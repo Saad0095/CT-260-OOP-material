@@ -1,0 +1,119 @@
+PART A: Defining Design Patterns
+In Object-Oriented Programming (OOP), a Design Pattern is a generalized, reusable solution to a commonly occurring problem within a given context in software design. It isn’t a finished piece of code that you can copy and paste; rather, it is a template or a description of how to organize classes and objects to solve a structural or functional challenge.
+
+How it differs from libraries or simple classes:
+
+Vs. Standard Library: A library provides specific, pre-written code (like std::vector in C++) that you call to perform a task. A design pattern is a strategy for how you structure your own code.
+
+Vs. Simple Class: A simple class is a blueprint for a specific entity (like a Student). A design pattern usually involves a relationship between multiple classes to ensure the system remains flexible and maintainable.
+
+PART B: Categories of Design Patterns
+Creational Patterns: These focus on the mechanisms of object creation. They aim to create objects in a manner suitable to the situation, preventing the complexities of direct instantiation (using new) from cluttering the code.
+
+Structural Patterns: These deal with object composition. They simplify the design by identifying a simple way to realize relationships between entities, ensuring that if one part of a system changes, the entire structure doesn’t need to.
+
+Behavioral Patterns: These focus specifically on communication between objects. They define how objects interact and distribute responsibility to make the flow of the program more organized and efficient.
+
+PART C: Pattern Analysis & Implementation
+1. Singleton Pattern (Creational)
+The Problem:
+Imagine a system with a Database Connection Manager. If we use basic OOP, any part of the program can call new DatabaseConnection(). This could lead to dozens of open connections, wasting memory and potentially causing the database to crash. There is no easy way to ensure every class is using the same instance.
+
+The Solution:
+The Singleton pattern ensures a class has only one instance and provides a global point of access to it.
+
+C++ Code:
+
+C++
+#include <iostream>
+#include <string>
+
+class Database {
+private:
+    static Database* instance;
+    Database() {} // Private constructor
+
+public:
+    static Database* getInstance() {
+        if (!instance) {
+            instance = new Database();
+        }
+        return instance;
+    }
+
+    void query(std::string sql) {
+        std::cout << "Executing: " << sql << " on unique DB instance." << std::endl;
+    }
+};
+
+Database* Database::instance = nullptr;
+
+int main() {
+    Database* s1 = Database::getInstance();
+    Database* s2 = Database::getInstance();
+
+    s1->query("SELECT * FROM Students");
+    
+    return 0;
+}
+UML-style Diagram:
+
+2. Strategy Pattern (Behavioral)
+The Problem:
+Consider a Payment Processor. Initially, you only accept Credit Cards. If you want to add PayPal and Bitcoin using basic inheritance, you might end up with a massive switch statement inside your pay() function. Every time you add a payment method, you must modify the core code, violating the Open/Closed Principle.
+
+The Solution:
+The Strategy pattern defines a family of algorithms, encapsulates each one, and makes them interchangeable. This allows the payment method to vary independently from the clients that use it.
+
+C++ Code:
+
+C++
+#include <iostream>
+#include <memory>
+
+// Strategy Interface
+class PaymentStrategy {
+public:
+    virtual void collectPayment(int amount) = 0;
+    virtual ~PaymentStrategy() {}
+};
+
+// Concrete Strategy A
+class CreditCard : public PaymentStrategy {
+public:
+    void collectPayment(int amount) override {
+        std::cout << "Paid " << amount << " using Credit Card.\n";
+    }
+};
+
+// Concrete Strategy B
+class PayPal : public PaymentStrategy {
+public:
+    void collectPayment(int amount) override {
+        std::cout << "Paid " << amount << " using PayPal.\n";
+    }
+};
+
+// Context
+class ShoppingCart {
+private:
+    PaymentStrategy* strategy;
+public:
+    void setPaymentMethod(PaymentStrategy* s) { strategy = s; }
+    void checkout(int amount) { strategy->collectPayment(amount); }
+};
+
+int main() {
+    ShoppingCart cart;
+    CreditCard cc;
+    PayPal pp;
+
+    cart.setPaymentMethod(&cc);
+    cart.checkout(100);
+
+    cart.setPaymentMethod(&pp);
+    cart.checkout(200);
+
+    return 0;
+}
+UML-style Diagram:
